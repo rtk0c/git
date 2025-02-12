@@ -903,6 +903,11 @@ cmd_add_commit () {
 	assert test $# = 1
 	rev=$(git rev-parse --verify "$1^{commit}") || exit $?
 
+	# BEGIN CAHNGES(sparse-checkout)
+	echo '/####SUBTREE SPARSE-CHECKOUT####/q;p' >>.git/info/sparse-checkout
+	cat >>.git/info/sparse-checkout <.git/info/sparse-checkout.subtree
+	# END CAHNGES
+
 	debug "Adding $dir as '$rev'..."
 	if test -z "$arg_split_rejoin"
 	then
@@ -932,6 +937,10 @@ cmd_add_commit () {
 			git commit-tree "$tree" $headp -p "$revp") || exit $?
 	fi
 	git reset "$commit" || exit $?
+
+	# BEGIN CAHNGES(sparse-checkout)
+	sed -i '/####SUBTREE SPARSE-CHECKOUT####/q;p' .git/info/sparse-checkout
+	# END CAHNGES
 
 	say >&2 "Added dir '$dir'"
 }
